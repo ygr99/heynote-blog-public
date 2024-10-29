@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>热力图</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <h3>热力图</h3>
+    <div class="relitu-container" id="relitu-container">
+      <!-- 这里会动态生成热力图 -->
+    </div>
+    <div class="summary">
+      写写停停，博主已记录 <span id="diary-count">0</span> 篇日记
+      <span id="note-count">0</span> 篇笔记!
+    </div>
+
+    <!-- 添加笔记列表部分 -->
+    <h3>笔记列表</h3>
+    <div id="note-list">
+      <!-- 这里会动态生成笔记列表 -->
+    </div>
+
+    <script src="https://unpkg.com/@popperjs/core@2"></script>
+    <script src="https://unpkg.com/tippy.js@6"></script>
+    <script src="script.js"></script>
+  </body>
+</html>
