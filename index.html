@@ -3,21 +3,45 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>热力图</title>
+    <title>heynote blog</title>
     <link rel="stylesheet" href="styles.css" />
   </head>
   <body>
-    <h3>热力图</h3>
+    <div id="loading-spinner">
+      <div class="spinner"></div>
+    </div>
+
+    <h3 class="heatmap-title">
+      <a
+        href="#"
+        id="random-diary"
+        target="_blank"
+        style="text-decoration: none"
+        >热力图</a
+      >
+    </h3>
     <div class="relitu-container" id="relitu-container">
       <!-- 这里会动态生成热力图 -->
     </div>
     <div class="summary">
-      写写停停，博主已记录 <span id="diary-count">0</span> 篇日记
-      <span id="note-count">0</span> 篇笔记!
+      写写停停
+      <span id="diary-count">0</span> 篇日记
+      <span id="note-count">0</span> 篇笔记
+      <span id="total-word-count">0</span> 字
     </div>
+    <div id="random-sentence" class="summary"></div>
+
+    <br />
+    <a href="./timeline.html" target="_blank">时间线</a>
+    <a href="./sentence.html" target="_blank">句子集</a>
+    <!-- <a href="#" id="random-article" target="_blank">随机文章</a> -->
 
     <!-- 添加笔记列表部分 -->
-    <h3>笔记列表</h3>
+    <h3>
+      <a href="#" id="random-note" target="_blank" style="text-decoration: none"
+        >笔记列表</a
+      >
+    </h3>
     <div id="note-list">
       <!-- 这里会动态生成笔记列表 -->
     </div>
@@ -25,5 +49,16 @@
     <script src="https://unpkg.com/@popperjs/core@2"></script>
     <script src="https://unpkg.com/tippy.js@6"></script>
     <script src="script.js"></script>
+    <script
+      type="text/javascript"
+      src="https://myhkw.cn/player/js/jquery.min.js"
+    ></script>
+    <script
+      type="text/javascript"
+      id="myhk"
+      src="https://myhkw.cn/api/player/165613536537"
+      key="165613536537"
+      m="1"
+    ></script>
   </body>
 </html>

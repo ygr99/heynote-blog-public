@@ -37,14 +37,36 @@
           ),
           linear-gradient(to bottom, #cbd5e1 1px, transparent 1px); */
       }
-      .markdown-body {
-        max-width: 800px;
-        margin: 0 auto;
-      }
       .article-title {
         text-align: center;
         font-size: 24px;
+        /* margin-bottom: 20px; */
+      }
+      .char-counter {
+        display: flex;
+        justify-content: center;
+        color: #aaa;
+        font-size: 11px;
+        margin-top: 10px;
+        margin-bottom: 10px;
+      }
+      .markdown-body {
+        max-width: 800px;
+        margin: 0 auto;
         margin-bottom: 20px;
+        padding: 0 20px; /* 默认情况下，为左右两边增加20px的padding */
+      }
+
+      @media (max-width: 768px) {
+        .markdown-body {
+          padding: 0 15px; /* 在手机端，为左右两边增加15px的padding */
+        }
+      }
+
+      @media (max-width: 480px) {
+        .markdown-body {
+          padding: 0 15px; /* 在更小的屏幕上，为左右两边增加10px的padding */
+        }
       }
 
       pre code.hljs {
@@ -1037,7 +1059,9 @@
   </head>
   <body>
     <div class="article-title" id="article-title"></div>
+    <div class="char-counter" id="char-counter"></div>
     <div id="article-content" class="markdown-body"></div>
+
     <!-- 引入 marked 和 highlight.js 的 JavaScript 文件 -->
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/marked-highlight"></script>
@@ -1064,6 +1088,10 @@
             });
             document.getElementById("article-title").innerText = title;
             document.getElementById("article-content").innerHTML = html;
+            hljs.highlightAll(); // 手动初始化 highlight.js
+
+            // 更新字符计数器
+            updateCharCounter(article);
           } else {
             document.getElementById("article-title").innerText = "文章未找到";
             document.getElementById("article-content").innerHTML = "";
@@ -1074,6 +1102,14 @@
           document.getElementById("article-title").innerText = "加载文章时出错";
           document.getElementById("article-content").innerHTML = "";
         });
+
+      // 更新字符计数器
+      function updateCharCounter(article) {
+        const charCounterElement = document.getElementById("char-counter");
+        const date = new Date(article.date).toISOString().split("T")[0];
+        const wordCount = article.word_count;
+        charCounterElement.innerText = `${date} ${wordCount}字`;
+      }
     </script>
   </body>
 </html>

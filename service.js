@@ -17,10 +17,11 @@ function parseFileContent(content) {
   const result = [];
   let currentBlock = null;
   let lastDate = null;
+  const sentences = [];
 
   lines.forEach((line) => {
     if (line.startsWith("∞∞∞markdown")) {
-      if (currentBlock) {
+      if (currentBlock && currentBlock.title) {
         result.push(currentBlock);
       }
       currentBlock = {
@@ -60,9 +61,14 @@ function parseFileContent(content) {
         if (currentBlock.section === "📘" && !currentBlock.date) {
           currentBlock.date = lastDate;
         }
-      } else {
+      } else if (currentBlock.title) {
         currentBlock.content += line + "\n";
       }
+    }
+
+    // 提取包含 #句子 的行
+    if (line.includes("#句子")) {
+      sentences.push(line.replace("#句子", "").trim());
     }
   });
 
@@ -70,15 +76,18 @@ function parseFileContent(content) {
     result.push(currentBlock);
   }
 
+  // 过滤掉没有标题的块
+  const filteredResult = result.filter((item) => item.title);
+
   // 计算字数
-  result.forEach((item) => {
+  filteredResult.forEach((item) => {
     // 去除两端空白字符，并且去除中间的空白字符和特殊符号（如换行符 \n）
     item.word_count = item.content.trim().replace(/\s+/g, "").length;
     // 生成 href 字段
     item.href = `article.html?id=${item.id}`;
   });
 
-  return result;
+  return { parsedData: filteredResult, sentences };
 }
 
 // 读取文件并解析
@@ -107,6 +116,18 @@ function writeDataToJsonFile(data, filePath) {
   });
 }
 
+// 覆盖 sentence.json 文件
+function writeSentencesToJsonFile(sentences, filePath) {
+  const jsonData = JSON.stringify({ sentences }, null, 2);
+  fs.writeFile(filePath, jsonData, "utf8", (err) => {
+    if (err) {
+      console.error("Error writing to sentence.json:", err);
+    } else {
+      console.log("Data successfully written to sentence.json");
+    }
+  });
+}
+
 // 主函数
 async function main() {
   const bufferFilePath = path.join(
@@ -117,10 +138,12 @@ async function main() {
     "buffer.txt"
   );
   const dataFilePath = path.join(__dirname, "data.json");
+  const sentenceFilePath = path.join(__dirname, "sentence.json");
 
   try {
-    const parsedData = await readAndParseFile(bufferFilePath);
+    const { parsedData, sentences } = await readAndParseFile(bufferFilePath);
     writeDataToJsonFile(parsedData, dataFilePath);
+    writeSentencesToJsonFile(sentences, sentenceFilePath);
   } catch (err) {
     console.error("Error processing file:", err);
   }

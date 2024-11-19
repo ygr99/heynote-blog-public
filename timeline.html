@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="zh">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        background-color: #f0f0f0;
+      }
+
+      a {
+        color: #1e81f8;
+        text-decoration: none;
+      }
+
+      .timeline-container {
+        max-width: 800px;
+        margin: 40px auto;
+        position: relative;
+        padding: 20px;
+        background: linear-gradient(to bottom, #e6f3ff, #f5f9ff);
+      }
+      .timeline {
+        position: relative;
+        padding: 20px 0;
+      }
+      .timeline::before {
+        content: "";
+        position: absolute;
+        width: 2px;
+        background: #2196f3;
+        top: 0;
+        bottom: 0;
+        left: 50%;
+        margin-left: -1px;
+      }
+      .timeline-item {
+        margin-bottom: 60px; /* Increased from 40px */
+        position: relative;
+      }
+      .timeline-content {
+        width: 45%;
+        padding: 0 15px;
+        position: relative;
+        background: white;
+        border: 1px solid #ddd;
+        border-radius: 6px;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.24);
+      }
+      .timeline-content.left {
+        margin-right: auto;
+        text-align: right;
+      }
+      .timeline-content.right {
+        margin-left: auto;
+        text-align: left;
+      }
+      .date-marker {
+        position: absolute;
+        width: 5px;
+        height: 5px;
+        background: #fff;
+        border: 3px solid #2196f3;
+        border-radius: 50%;
+        left: 50%;
+        transform: translateX(-50%);
+        top: 18px;
+        z-index: 1;
+      }
+      .date {
+        position: absolute;
+        left: 50%;
+        transform: translateX(-50%);
+        background: #2196f3;
+        color: white;
+        padding: 4px 8px;
+        border-radius: 4px;
+        font-size: 12px;
+        top: -40px;
+        white-space: nowrap;
+        display: flex;
+        align-items: center;
+      }
+      .date-text {
+        margin: 0;
+        font-size: 14px;
+        line-height: 1.5;
+        color: white;
+      }
+      .timeline-content::after {
+        content: "";
+        position: absolute;
+        top: 15px;
+        width: 0;
+        height: 0;
+        border-style: solid;
+      }
+      .timeline-content.left::after {
+        right: -10px;
+        border-width: 10px 0 10px 10px;
+        border-color: transparent transparent transparent white;
+      }
+      .timeline-content.right::after {
+        left: -10px;
+        border-width: 10px 10px 10px 0;
+        border-color: transparent white transparent transparent;
+      }
+
+      /* Responsive styles */
+      @media (max-width: 600px) {
+        .timeline::before {
+          left: 10px;
+        }
+        .timeline-content {
+          width: calc(100% - 40px);
+          margin-top: 60px; /* Add top margin for mobile view */
+        }
+        .timeline-content.left,
+        .timeline-content.right {
+          margin-left: 20px;
+          text-align: left;
+        }
+        .date-marker {
+          left: 10px;
+        }
+        .date {
+          left: 10px;
+          transform: none;
+          top: -40px; /* Increase top spacing for mobile view */
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="timeline-container">
+      <div id="timeline" class="timeline">
+        <!-- Timeline items will be dynamically inserted here -->
+      </div>
+    </div>
+
+    <script>
+      // Function to fetch data from data.json
+      async function fetchTimelineData() {
+        const response = await fetch("data.json");
+        const data = await response.json();
+        return data;
+      }
+
+      // Function to create timeline items
+      function createTimelineItem(
+        date,
+        dayOfWeek,
+        weekNumber,
+        titlesWithHref,
+        isLeft
+      ) {
+        const item = document.createElement("div");
+        item.className = "timeline-item";
+
+        const dateMarker = document.createElement("div");
+        dateMarker.className = "date-marker";
+
+        const dateElement = document.createElement("div");
+        dateElement.className = "date";
+        dateElement.innerHTML = `<span class="date-text" style="text-align: center;">${date}</span><span class="date-text" style="margin-left: 5px;">${dayOfWeek} ${weekNumber}</span>`;
+
+        const timelineContent = document.createElement("div");
+        timelineContent.className = `timeline-content ${
+          isLeft ? "left" : "right"
+        }`;
+
+        const contentText = document.createElement("p");
+        contentText.className = "content-text";
+
+        titlesWithHref.forEach((titleWithHref) => {
+          const link = document.createElement("a");
+          link.href = titleWithHref.href;
+          link.target = "_blank"; // Open in new tab
+          link.textContent = titleWithHref.title;
+          contentText.appendChild(link);
+          contentText.appendChild(document.createElement("br"));
+        });
+
+        timelineContent.appendChild(contentText);
+        item.appendChild(dateMarker);
+        item.appendChild(dateElement);
+        item.appendChild(timelineContent);
+
+        return item;
+      }
+
+      // Function to group data by date
+      function groupDataByDate(data) {
+        const groupedData = {};
+        data.forEach((item) => {
+          if (item.date) {
+            // Only group items with a valid date
+            if (!groupedData[item.date]) {
+              groupedData[item.date] = [];
+            }
+            groupedData[item.date].push({ title: item.title, href: item.href });
+          }
+        });
+        return groupedData;
+      }
+
+      // Function to extract day of week and week number from title
+      function extractDayAndWeek(title) {
+        const regex =
+          /(\d{4}年\d{2}月\d{2}日)\s*(周[一二三四五六日])\s*(\d{1,2}周)/;
+        const match = title.match(regex);
+        if (match) {
+          return {
+            dayOfWeek: match[2],
+            weekNumber: match[3],
+          };
+        }
+        return {
+          dayOfWeek: "",
+          weekNumber: "",
+        };
+      }
+
+      // Function to populate the timeline
+      async function populateTimeline() {
+        const timeline = document.getElementById("timeline");
+        const timelineData = await fetchTimelineData();
+        const groupedData = groupDataByDate(timelineData);
+
+        Object.keys(groupedData).forEach((date, index) => {
+          const titlesWithHref = groupedData[date];
+          const { dayOfWeek, weekNumber } = extractDayAndWeek(
+            titlesWithHref[0].title
+          );
+          const isLeft = index % 2 === 0; // 偶数索引在左边，奇数索引在右边
+          const timelineItem = createTimelineItem(
+            date,
+            dayOfWeek,
+            weekNumber,
+            titlesWithHref,
+            isLeft
+          );
+          timeline.appendChild(timelineItem);
+        });
+      }
+
+      // Call the function to populate the timeline when the page loads
+      window.onload = populateTimeline;
+    </script>
+  </body>
+</html>

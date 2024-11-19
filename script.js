@@ -13,8 +13,10 @@ function getThisSunday(date) {
 }
 
 const today = new Date();
+console.log("today:", today);
 const sunday = getThisSunday(today);
 let startDate = new Date(sunday);
+console.log("sunday Date:", startDate);
 
 // 计算当前是第几周
 const startOfYear = new Date(today.getFullYear(), 0, 1);
@@ -53,7 +55,7 @@ function dateBuild(data) {
     // 统计文章字符总数
     let sumOfWordcounts = 0;
     dataContent.forEach((item) => {
-      sumOfWordcounts += item.content.length;
+      sumOfWordcounts += item.word_count;
     });
 
     // 放进数组中
@@ -81,20 +83,24 @@ function fillGrid(data) {
   // 计算全部日记和笔记的数量
   let diaryCount = 0;
   let noteCount = 0;
+  let totalWordCount = 0;
   data.forEach((item) => {
     if (item.section === "📆") {
       diaryCount++;
     } else if (item.section === "📘") {
       noteCount++;
     }
+    totalWordCount += item.word_count;
   });
 
   // 更新显示日记和笔记数量的元素
   const diaryCountElement = document.getElementById("diary-count");
   const noteCountElement = document.getElementById("note-count");
-  if (diaryCountElement && noteCountElement) {
+  const totalWordCountElement = document.getElementById("total-word-count");
+  if (diaryCountElement && noteCountElement && totalWordCountElement) {
     diaryCountElement.innerText = diaryCount;
     noteCountElement.innerText = noteCount;
+    totalWordCountElement.innerText = totalWordCount;
   }
 
   // 倒序遍历文章数据
@@ -111,9 +117,10 @@ function fillGrid(data) {
         )
         .join(" ");
       // 构建grid-info中的信息
+      // 格子颜色 绿色 ? `rgba(77, 208, 90,${article.wordcount / 5000 + 0.2})`
       const backgroundColor =
         article.wordcount != 0
-          ? `rgba(77, 208, 90,${article.wordcount / 5000 + 0.2})`
+          ? `rgba(30,129,248,${article.wordcount / 5000 + 0.2})`
           : "#E9ECEF";
       gridItem.innerHTML = `<div class="item-info item-tippy" data-date="${article.date}" data-tippy-content="${article.date}，共 ${article.count} 篇，共 ${article.wordcount} 字<br />${tooltipStr}" style="background-color:${backgroundColor}"></div>`;
 
@@ -173,10 +180,12 @@ function fillGrid(data) {
 }
 
 document.addEventListener("DOMContentLoaded", function () {
+  const loadingSpinner = document.getElementById("loading-spinner");
+  loadingSpinner.style.display = "flex"; // 显示加载动画
+
   fetch("data.json")
     .then((response) => response.json())
     .then((posts) => {
-      // 现在使用dateBuild函数处理数据，并将结果传递给fillGrid函数
       fillGrid(posts);
       tippy(".item-tippy", {
         allowHTML: true,
@@ -184,5 +193,49 @@ document.addEventListener("DOMContentLoaded", function () {
         maxWidth: "none",
         appendTo: () => document.body,
       });
+
+      // 添加随机文章跳转功能
+      // const randomArticleButton = document.getElementById("random-article");
+      // randomArticleButton.addEventListener("click", function (event) {
+      //   event.preventDefault();
+      //   const randomIndex = Math.floor(Math.random() * posts.length);
+      //   const randomArticle = posts[randomIndex];
+      //   window.open(randomArticle.href, "_blank");
+      // });
+
+      // 添加随机笔记跳转功能
+      const randomNoteButton = document.getElementById("random-note");
+      randomNoteButton.addEventListener("click", function (event) {
+        event.preventDefault();
+        const notes = posts.filter((item) => item.section === "📘");
+        const randomIndex = Math.floor(Math.random() * notes.length);
+        const randomNote = notes[randomIndex];
+        window.open(randomNote.href, "_blank");
+      });
+
+      // 添加随机日记跳转功能
+      const randomDiaryButton = document.getElementById("random-diary");
+      randomDiaryButton.addEventListener("click", function (event) {
+        event.preventDefault();
+        const diaries = posts.filter((item) => item.section === "📆");
+        const randomIndex = Math.floor(Math.random() * diaries.length);
+        const randomDiary = diaries[randomIndex];
+        window.open(randomDiary.href, "_blank");
+      });
+
+      // 获取随机句子
+      fetch("sentence.json")
+        .then((response) => response.json())
+        .then((sentences) => {
+          const randomIndex = Math.floor(
+            Math.random() * sentences.sentences.length
+          );
+          const randomSentence = sentences.sentences[randomIndex];
+          const randomSentenceDiv = document.getElementById("random-sentence");
+          randomSentenceDiv.innerHTML = `<span>「${randomSentence}」</span>`;
+        });
+    })
+    .finally(() => {
+      loadingSpinner.style.display = "none"; // 隐藏加载动画
     });
 });

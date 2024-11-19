@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>句子列表</title>
+    <style>
+      body {
+        font-family: "Helvetica Neue", Arial, sans-serif;
+        margin: 0;
+        padding: 0;
+        background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+        min-height: 100vh;
+      }
+
+      .container {
+        width: 90%;
+        max-width: 800px;
+        margin: 2rem auto;
+        padding: 0.2rem 2rem 2rem 2rem;
+        background-color: rgba(255, 255, 255, 0.9);
+        border-radius: 12px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1), 0 1px 3px rgba(0, 0, 0, 0.08);
+      }
+
+      h1 {
+        text-align: center;
+        color: #2c3e50;
+        font-size: 2.5rem;
+        margin-bottom: 2rem;
+      }
+
+      .sentence-list {
+        list-style-type: none;
+        padding: 0;
+      }
+
+      .sentence-list li {
+        margin: 1rem 0;
+        padding: 1rem;
+        background-color: #ffffff;
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        transition: all 0.3s ease;
+      }
+
+      .sentence-list li:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+      }
+
+      @media (max-width: 600px) {
+        .container {
+          width: 95%;
+          padding: 1rem;
+        }
+
+        h1 {
+          font-size: 2rem;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h1>句子列表</h1>
+      <ul class="sentence-list" id="sentence-list">
+        <!-- 句子将在这里动态生成 -->
+      </ul>
+    </div>
+
+    <script>
+      document.addEventListener("DOMContentLoaded", function () {
+        fetch("sentence.json")
+          .then((response) => response.json())
+          .then((data) => {
+            const sentenceList = document.getElementById("sentence-list");
+            data.sentences.forEach((sentence, index) => {
+              const li = document.createElement("li");
+              li.textContent = sentence;
+              li.style.opacity = "0";
+              li.style.transform = "translateY(20px)";
+              sentenceList.appendChild(li);
+
+              setTimeout(() => {
+                li.style.transition = "opacity 0.5s ease, transform 0.5s ease";
+                li.style.opacity = "1";
+                li.style.transform = "translateY(0)";
+              }, index * 100);
+            });
+          })
+          .catch((error) => {
+            console.error("Error fetching sentences:", error);
+          });
+      });
+    </script>
+  </body>
+</html>
